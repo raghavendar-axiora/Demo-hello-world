@@ -1,13 +1,28 @@
-name: Hello World 
+name: Docker Build & IP Output
+
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
 jobs:
-  say-hello:
+  docker-build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Print message
-        run: echo "Hello World"
+
+      - name: Build Docker image
+        run: docker build -t python-hello-world:latest .
+
+      - name: Run container and show IP
+        run: |
+          # Run container in detached mode
+          CONTAINER_ID=$(docker run -d python-hello-world:latest)
+          echo "Container ID: $CONTAINER_ID"
+
+          # Get container IP address
+          IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID)
+          echo "Container IP Address: $IP"
